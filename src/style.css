@@ -5,6 +5,14 @@
     font-style: normal;
     font-display: swap;
 }
+@font-face {
+    font-family: 'quicksand';
+    src: url('./Quicksand.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -33,6 +41,7 @@ footer, header, hgroup, menu, nav, section {
 }
 body {
     line-height: 1;
+    font-family: quicksand;
 }
 ol, ul {
     list-style: none;
@@ -124,6 +133,30 @@ form {
 
 label {
     color:white !important;
+    margin-bottom: 10px;
+}
+
+#send-button{
+    position: absolute;
+    left:50%;
+    transform: translate(-50%);
+    margin-top: 25px;
+    margin-bottom: 15px;
+    background-color: #8e52c7;
+    border:none;
+    color: white;
+    padding: 5px;
+    width: 80%;
+    border-radius: 25px;
+    -webkit-box-shadow: 5px 5px 13px 1px rgba(0,0,0,0.67);
+    box-shadow: 5px 5px 13px 1px rgba(0,0,0,0.67);
+    font-family: madjoe;
+    font-size: 2em;
+}
+
+#send-button:hover{
+    border:2px yellow solid;
+
 }
 
 .firebaseui-link{
@@ -137,19 +170,22 @@ label {
 
 input[type="email"], [type="text"],textarea {
     color:yellow !important;
-    background-color: #452f63 !important;
+    background-color: #311152 !important;
     border: none;
-    margin: 10px;
     height: 30px;
+}
+
+input[type="checkbox"]{
 }
 
 select {
     color: white;
-    background-color: #452f63 !important;
+    background-color: #311152 !important;
     border: none;
-    margin: 10px;
     height: 30px;
 }
+
+
 textarea:focus, input:focus{
     outline: none;
     border-bottom: #8e52c7 2px solid;
@@ -197,7 +233,12 @@ textarea:focus, input:focus{
 input[type=text]{
 
 }
-
+#close-spawns {
+    position: absolute;
+    margin-top : -30px;
+    right: 50px;
+    color:white;
+}
 
 
 .close-button {
@@ -223,15 +264,102 @@ input[type=text]{
 
 .tag-bundle{
     display: inline;
+    -webkit-animation: puff-in-center 0.7s cubic-bezier(0.470, 0.000, 0.745, 0.715) both;
+    animation: puff-in-center 0.7s cubic-bezier(0.470, 0.000, 0.745, 0.715) both;
 }
 
 .hidden {
     display: none;
 }
 
+#tags{
+    background-color: rgba(64,44,94,1);
+    border-radius: 25px;
+    padding: 5px;
+    border:2px white solid;
+}
+
+#add-tag{
+    background-color: #8e52c7;
+    border:none;
+    color: white;
+}
+
+#tasks-container {
+    background-color: rgba(64,44,94,1);
+    border-radius: 25px;
+    padding: 5px;
+    border:2px white solid;
+}
+
+.task-name{
+    border-radius: 25px 0px 0px 25px;
+}
+
+.task-box{
+
+}
+
+.add-task{
+    color:white;
+    font-size: 3em;
+    align-items: center;
+    margin-left: 10px;
+    margin-top: -10px;
+}
+
+.box-checked{
+    background-color: lightgreen !important;
+    color:black !important;
+    -webkit-animation: puff-in-center 0.7s cubic-bezier(0.470, 0.000, 0.745, 0.715) both;
+    animation: puff-in-center 0.7s cubic-bezier(0.470, 0.000, 0.745, 0.715) both;
+}
+
+.task-bundle{
+    padding:10px;
+
+    display: flex;
+}
+
+
+
+.box-div{
+    display: flex;
+    height: 30px;
+    align-items: center;
+    background-color: #8e52c7;
+    border-radius: 0px 25px 25px 0px;
+    /*margin-bottom:10px;*/
+}
+
+
+
 #tags-input-container {
 
-    padding: 20px;
+    padding: 10px;
+    display: flex;
+}
+
+#spawn-frame{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#spawn-left{
+    background-color: rgba(64,44,94,1);
+    border-radius: 25px;
+    padding: 5px;
+    margin-right: 25px;
+    border:2px white solid;
+}
+
+.section-name{
+    color:white;
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 5px;
+    border-radius: 25px;
+    border-bottom:1px solid white
 }
 
 #spawn-container{
@@ -248,10 +376,55 @@ input[type=text]{
     padding:50px;
 }
 
+#spawn-right{
+
+}
+
 .bundle {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 10px;
 
+}
+@-webkit-keyframes puff-in-center {
+    0% {
+        -webkit-transform: scale(2);
+        transform: scale(2);
+        -webkit-filter: blur(4px);
+        filter: blur(4px);
+        opacity: 0;
+    }
+    100% {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+        -webkit-filter: blur(0px);
+        filter: blur(0px);
+        opacity: 1;
+    }
+}
+@keyframes puff-in-center {
+    0% {
+        -webkit-transform: scale(2);
+        transform: scale(2);
+        -webkit-filter: blur(4px);
+        filter: blur(4px);
+        opacity: 0;
+    }
+    100% {
+        -webkit-transform: scale(1);
+        transform: scale(1);
+        -webkit-filter: blur(0px);
+        filter: blur(0px);
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }

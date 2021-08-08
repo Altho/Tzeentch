@@ -4,10 +4,12 @@ import 'firebase/auth';
 import 'firebase/database';
 import 'firebaseui'
 import 'firebaseui/dist/firebaseui.css'
+
 import profile from './profile.svg';
 import tzeentch from './tzeentch.svg';
 import { nanoid } from 'nanoid';
 let tags= [];
+let tasks = [];
 
 import close from './close.svg';
 const firebaseConfig = {
@@ -165,7 +167,17 @@ const domElements = (() =>{
     }
     const spawnUiGen = async() => {
         //spawn name
+        const infosName = createElem('div','.section-name');
+        infosName.innerText="Spawn's infos";
         const spawnContainer = createElem('div','#spawn-container');
+        const spawnFrame = createElem('div', '#spawn-frame');
+        const spawnLeft = createElem('div', '#spawn-left');
+        spawnLeft.appendChild(infosName);
+        const spawnRight = createElem('div', '#spawn-right');
+        spawnFrame.appendChild(spawnLeft);
+        spawnFrame.appendChild(spawnRight);
+        spawnContainer.appendChild(spawnFrame);
+
         const spawnNameBundle = createElem('div','.bundle');
         const spawnNameLabel = createElem('label');
         const spawnName = createElem('input','#spawn-name');
@@ -174,14 +186,14 @@ const domElements = (() =>{
         closeSpawns.addEventListener('click', ()=>{
             spawnContainer.remove();
         })
-        spawnContainer.appendChild(closeSpawns);
+        spawnRight.appendChild(closeSpawns);
 
         spawnName.type="text";
         spawnNameLabel.setAttribute("for",spawnName.id);
         spawnNameLabel.innerText="Spawn name";
         spawnNameBundle.appendChild(spawnNameLabel);
         spawnNameBundle.appendChild(spawnName);
-        spawnContainer.appendChild(spawnNameBundle);
+        spawnLeft.appendChild(spawnNameBundle);
         //spawn description
         const spawnDescBundle = createElem('div','.bundle');
         const spawnDescLabel = createElem('label');
@@ -190,7 +202,7 @@ const domElements = (() =>{
         spawnDescLabel.setAttribute("for",spawnDesc.id);
         spawnDescBundle.appendChild(spawnDescLabel);
         spawnDescBundle.appendChild(spawnDesc);
-        spawnContainer.appendChild(spawnDescBundle);
+        spawnLeft.appendChild(spawnDescBundle);
         //spawn priority
         const spawnPriorityBundle = createElem('div','.bundle');
         const spawnPriorityLabel = createElem('label');
@@ -229,27 +241,55 @@ const domElements = (() =>{
             option.innerText= cat;
             categories.appendChild(option);
         }
-        spawnContainer.appendChild(catBundle);
+        spawnLeft.appendChild(catBundle);
         spawnPriorityBundle.appendChild(spawnPriority);
-        spawnContainer.appendChild(spawnPriorityBundle);
+        spawnLeft.appendChild(spawnPriorityBundle);
         // create tag container and systems
+        const tagName = createElem('div','.section-name');
+        tagName.innerText="Tags";
         const tagContainer = createElem('div','#tags');
+        tagContainer.appendChild(tagName)
         const tagsInputContainer = createElem('div','#tags-input-container','.hidden');
         const tagsInput = createElem('input', '#tags-input')
         tagsInput.type="text";
         tagsInputContainer.appendChild(tagsInput);
-        const tagsInputDisplay = createElem('a', '#tags-input-display');
-        tagsInputDisplay.innerHTML="+ Add a tag";
-        tagsInputDisplay.addEventListener('click', displayTags);
-        tagContainer.appendChild(tagsInputDisplay);
+
         tagContainer.appendChild(tagsInputContainer)
         const addTagButton = createElem('button', '#add-tag');
         addTagButton.addEventListener('click',await tagsToContainer);
         addTagButton.innerText="Add";
         tagsInputContainer.appendChild(addTagButton);
         const tagsDisplay = createElem('div', '#tags-display');
-        spawnContainer.appendChild(tagContainer);
+        spawnRight.appendChild(tagContainer);
         tagContainer.appendChild(tagsDisplay);
+        // tasks
+        const tasksContainer = createElem('div', '#tasks-container');
+        const taskName = createElem('div','.section-name');
+        taskName.innerText="Tasks";
+        tasksContainer.appendChild(taskName);
+        spawnRight.appendChild(tasksContainer);
+        const addTasks = createElem('div', '.add-task');
+        tasksContainer.appendChild(addTasks);
+        addTasks.innerHTML="+";
+        addTasks.addEventListener('click',function(){
+            addTasks.remove();
+            const taskBundle = createElem('div', '.task-bundle');
+            tasksContainer.appendChild(taskBundle);
+            const taskName = createElem('input', '.task-name');
+            taskName.placeholder="My Task"
+            taskName.type="text";
+            const boxDiv = createElem('div', '.box-div');
+            const taskBox = createElem('input', '.task-box');
+            taskBox.addEventListener('click', function(){
+                console.log('clicked');
+                taskName.classList.toggle('box-checked');
+            })
+            taskBox.type="checkbox";
+            taskBundle.appendChild(taskName);
+            taskBundle.appendChild(boxDiv);
+            taskBundle.appendChild(addTasks);
+            boxDiv.appendChild(taskBox);
+        })
 
 
         //send button
@@ -289,19 +329,7 @@ let categ;
 
 
 
-function displayTags(){
-    const tagsCont = document.querySelector('#tags-input-container');
-    const text = document.querySelector('#tags-input-display')
 
-tagsCont.classList.toggle('hidden');
-if(text.innerHTML==="+ Add a tag"){
-    text.innerHTML="- close";
-}
-else{
-    text.innerHTML="+ Add a tag";
-    }
-
-}
 
 
 function createElem(type,...idandclass){
@@ -362,23 +390,36 @@ function getSpawnData(){
     const spawnDesc = document.querySelector('#spawn-desc');
     const spawnPriority = document.querySelector('#spawn-priority');
     const category = document.querySelector('#categories')
-    const spawnId = nanoid();
+    const getTasks =  () => {
+        const allTasks = document.querySelectorAll('.task-name');
+        const allTaskBoxes = document.querySelectorAll('.task-box');
+        for(let i = 0; i<allTasks.length; i++){
+            const taskValue = allTasks[i].value;
+            console.log(taskValue)
+            const checkedCheck = allTaskBoxes[i].checked;
+            console.log(checkedCheck)
+            tasks.push({task:taskValue,isDone:checkedCheck});
+        }
 
-    writeSpawn(spawnName.value,spawnDesc.value,spawnPriority.value,spawnId,category.value,tags);
+    }
+    const spawnId = nanoid();
+    getTasks();
+    writeSpawn(spawnName.value,spawnDesc.value,spawnPriority.value,spawnId,category.value,tags,tasks);
 
 
 
 };
 
-function writeSpawn(name,desc,priority,id,category,tags) {
-
+function writeSpawn(name,desc,priority,id,category,tags,tasks) {
+console.log(tasks);
 
     firebase.database().ref('users/' + userId+'/spawns/'+id).set({
         spawn_name: name,
         spawn_description: desc,
         spawn_priority : priority,
         spawn_category: category,
-        spawn_tags :tags
+        spawn_tags :tags,
+        spawn_tasks : tasks
     });
 }
 
