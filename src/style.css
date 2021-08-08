@@ -154,3 +154,29 @@ input[type="email"], [type="text"] {
     -webkit-box-shadow: 7px 6px 7px 0px rgba(0,0,0,0.59);
     box-shadow: 7px 6px 7px 0px rgba(0,0,0,0.59);
 }
+
+#tags-input {
+    display: none;
+}
+
+#spawn-container{
+    position: absolute;
+    left : 50%;
+    top:50%;
+    transform: translate(-50%,-50%);
+    background: rgba( 49, 17, 82, 0.45 );
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+    backdrop-filter: blur( 7.0px );
+    -webkit-backdrop-filter: blur( 7.0px );
+    border-radius: 25px 100px 25px 100px;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
+    padding:50px;
+}
+
+.bundle {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+
+}

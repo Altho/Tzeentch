@@ -5,11 +5,8 @@ import 'firebase/database';
 import 'firebaseui'
 import 'firebaseui/dist/firebaseui.css'
 import profile from './profile.svg';
-
-let userName;
-let loggedIn = false;
-let userID;
-
+import tzeentch from './tzeentch.svg';
+import { nanoid } from 'nanoid';
 
 const firebaseConfig = {
     apiKey: "AIzaSyACajKLIx2cK4KYmUnLEAieEnRgZBg6rbA",
@@ -23,10 +20,18 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 
+let userName;
+let loggedIn = false;
+const dbRef = firebase.database().ref();
+let userId;
+
+
+
+
 const ui = new firebaseui.auth.AuthUI(firebase.auth());
 
 
-const toDo =(name,description,priority,category,tag,task,sDate,dDate,link) => {
+const spawn =(name,description,priority,category,tag,task,sDate,dDate,link) => {
     const cDate = () => new Date();
     let getName = () => name;
     let getDescription = () => description;
@@ -41,17 +46,27 @@ const toDo =(name,description,priority,category,tag,task,sDate,dDate,link) => {
     return {cDate,getName,getDescription,getPriority,getCategory,getTag,getTask,getSDate,getDDate,getLink}
 }
 
-firebase.auth().onAuthStateChanged(function(user) {
+ firebase.auth().onAuthStateChanged(async function(user) {
     if (user) {
         user.providerData.forEach((profile) => {
-            userID = profile.uid;
+            userId = profile.uid;
             userName = profile.displayName;
             console.log (userName);
-            writeUserData(userID,profile.displayName,profile.email,profile.photoURL);
+            console.log(profile.email)
 
-
+            dbRef.child("users").child(userId).get().then((snapshot) => {
+                if (snapshot.exists()) {
+                    console.log(snapshot.val().username + snapshot.val().email);
+                } else {
+                    console.log("No data available");
+                }
+            }).catch((error) => {
+                console.error(error);
+            });
         });
+
         document.body.appendChild(domElements.navGen());
+        document.body.appendChild(await domElements.spawnUiGen());
 
 
 
@@ -78,7 +93,6 @@ firebase.auth().onAuthStateChanged(function(user) {
             callbacks: {
                 signInSuccessWithAuthResult: function(authResult, redirectUrl) {
 
-                    const profile = new Image();
 
                     bigAuthDiv.remove();
                 },
@@ -131,12 +145,12 @@ const domElements = (() =>{
         const appName = createElem('h1', '#appName');
         appName.innerText = "Tzeentch";
         const menu = createElem('ul', '#menu');
-        const profileImg = new Image();
-        profileImg.src = profile;
-        profileImg.id="user-profile";
+        const menuImg = new Image();
+        menuImg.src = tzeentch;
+        menuImg.id="user-profile";
         // const userProfile = createElem('li', '#user-profile', 'menu-element');
         // userProfile.innerText=userName
-        menu.appendChild(profileImg);
+        menu.appendChild(menuImg);
         navbar.appendChild(appName);
         navbar.appendChild(menu);
 
@@ -144,20 +158,127 @@ const domElements = (() =>{
         return navbar;
 
     }
-    return {navGen};
+    const spawnUiGen = async() => {
+        //spawn name
+        const spawnContainer = createElem('div','#spawn-container');
+        const spawnNameBundle = createElem('div','.bundle');
+        const spawnNameLabel = createElem('label');
+        const spawnName = createElem('input','#spawn-name');
+        spawnNameLabel.setAttribute("for",spawnName.id);
+        spawnNameLabel.innerText="Spawn name";
+        spawnNameBundle.appendChild(spawnNameLabel);
+        spawnNameBundle.appendChild(spawnName);
+        spawnContainer.appendChild(spawnNameBundle);
+        //spawn description
+        const spawnDescBundle = createElem('div','.bundle');
+        const spawnDescLabel = createElem('label');
+        spawnDescLabel.innerText="Describe your spawn (optional)."
+        const spawnDesc = createElem('textarea','#spawn-desc');
+        spawnDescLabel.setAttribute("for",spawnDesc.id);
+        spawnDescBundle.appendChild(spawnDescLabel);
+        spawnDescBundle.appendChild(spawnDesc);
+        spawnContainer.appendChild(spawnDescBundle);
+        //spawn priority
+        const spawnPriorityBundle = createElem('div','.bundle');
+        const spawnPriorityLabel = createElem('label');
+        spawnPriorityLabel.innerText="Priority."
+        const spawnPriority = createElem('select','#spawn-priority');
+        spawnPriorityLabel.setAttribute("for",spawnPriority.id);
+        spawnPriorityBundle.appendChild(spawnPriorityLabel);
+        const low = document.createElement('option');
+        low.value="low";
+        low.innerText="Low";
+        const medium = document.createElement('option');
+        medium.value="medium";
+        medium.innerText="Medium";
+        const important = document.createElement('option');
+        important.value="important";
+        important.innerText="Important";
+        const critical = document.createElement('option');
+        critical.value="critical";
+        critical.innerText="critical";
+        spawnPriority.appendChild(low);
+        spawnPriority.appendChild(medium);
+        spawnPriority.appendChild(important);
+        spawnPriority.appendChild(critical);
+        // Load categories
+        const catBundle = createElem('div', '.bundle');
+        const catLabel = createElem('label');
+        const categories = createElem('select', '#categories');
+        catLabel.setAttribute("for",catLabel.id);
+        catLabel.innerText="Categories";
+        catBundle.appendChild(catLabel);
+        catBundle.appendChild(categories);
+        const catArray = await fetchCategories();
+        for(let cat of catArray){
+            const option = document.createElement('option');
+            option.value= cat;
+            option.innerText= cat;
+            categories.appendChild(option);
+        }
+        spawnContainer.appendChild(catBundle);
+        spawnPriorityBundle.appendChild(spawnPriority);
+        spawnContainer.appendChild(spawnPriorityBundle);
+        // create tag container and systems
+        const tagContainer = createElem('div','#tags');
+        const tagsInputContainer = createElem('div','#tags-input-container',);
+        const tagsInput = createElem('input', '#tags-input')
+        tagsInputContainer.appendChild(tagsInput);
+        const tagsInputDisplay = createElem('a', '#tags-input-display');
+        tagsInputDisplay.innerHTML="+ Add a tag";
+        tagsInputDisplay.addEventListener('click', displayTags);
+        tagContainer.appendChild(tagsInputDisplay);
+        tagContainer.appendChild(tagsInputContainer)
+
+
+        spawnContainer.appendChild(tagContainer);
+
+
+        //send button
+        const sendButton = createElem('button','#send-button');
+        sendButton.innerText = "Create spawn";
+        sendButton.addEventListener('click', getSpawnData);
+        spawnContainer.appendChild(sendButton);
+
+
+
+
+
+        return spawnContainer
+
+    }
+    return {navGen, spawnUiGen};
 
 })();
 
 
-if(loggedIn === true){
-    console.log('your are logged in')
 
+async function fetchCategories(){
+let categ;
+   await dbRef.child("/").get().then((snapshot) => {
+        if (snapshot.exists()) {
+             categ = snapshot.val().categories ;
+            console.log(categ);
+
+        } else {
+            console.log("No data available");
+        }
+
+
+})
+    return  categ;
 }
-else {
-    console.log('please log in');
-};
 
 
+
+function displayTags(){
+    const tagsCont = document.querySelector('#tags-input');
+
+    tagsCont.style.display = tagsCont.style.display === 'none' ? '' : 'none';
+
+
+    tagsCont.style.toggle('hide-tags');
+}
 
 
 function createElem(type,...idandclass){
@@ -177,14 +298,42 @@ function createElem(type,...idandclass){
     return element
 }
 
+function getSpawnData(){
+    const spawnName = document.querySelector('#spawn-name');
+    const spawnDesc = document.querySelector('#spawn-desc');
+    const spawnPriority = document.querySelector('#spawn-priority');
+    const category = document.querySelector('#categories')
+    const spawnId = nanoid();
 
-function writeUserData(userId, name, email, imageUrl) {
-    firebase.database().ref('users/' + userId).set({
-        username: name,
-        email: email,
-        profile_picture : imageUrl
+    writeSpawn(spawnName.value,spawnDesc.value,spawnPriority.value,spawnId,category.value);
+
+
+
+};
+
+function writeSpawn(name,desc,priority,id,category) {
+
+
+    firebase.database().ref('users/' + userId+'/spawns/'+id).set({
+        spawn_name: name,
+        spawn_description: desc,
+        spawn_priority : priority,
+        spawn_category: category
     });
 }
+
+
+// function writeUserData() {
+//     firebase.database().ref('categories/').set({
+//         1: "Administrative",
+//         2: "Finance",
+//         3:"Groceries",
+//         4:"events",
+//         5:"Social"
+//     });
+// }
+//
+// writeUserData();
 
 
 
