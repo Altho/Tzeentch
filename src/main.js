@@ -7,7 +7,9 @@ import 'firebaseui/dist/firebaseui.css'
 import profile from './profile.svg';
 import tzeentch from './tzeentch.svg';
 import { nanoid } from 'nanoid';
+let tags= [];
 
+import close from './close.svg';
 const firebaseConfig = {
     apiKey: "AIzaSyACajKLIx2cK4KYmUnLEAieEnRgZBg6rbA",
     authDomain: "tzeentch-dcab7.firebaseapp.com",
@@ -148,6 +150,9 @@ const domElements = (() =>{
         const menuImg = new Image();
         menuImg.src = tzeentch;
         menuImg.id="user-profile";
+        menuImg.addEventListener('click', function (){
+            spawnUiGen();
+        })
         // const userProfile = createElem('li', '#user-profile', 'menu-element');
         // userProfile.innerText=userName
         menu.appendChild(menuImg);
@@ -164,6 +169,14 @@ const domElements = (() =>{
         const spawnNameBundle = createElem('div','.bundle');
         const spawnNameLabel = createElem('label');
         const spawnName = createElem('input','#spawn-name');
+        const closeSpawns = createElem('div', '#close-spawns');
+        closeSpawns.innerHTML = "Close";
+        closeSpawns.addEventListener('click', ()=>{
+            spawnContainer.remove();
+        })
+        spawnContainer.appendChild(closeSpawns);
+
+        spawnName.type="text";
         spawnNameLabel.setAttribute("for",spawnName.id);
         spawnNameLabel.innerText="Spawn name";
         spawnNameBundle.appendChild(spawnNameLabel);
@@ -221,17 +234,22 @@ const domElements = (() =>{
         spawnContainer.appendChild(spawnPriorityBundle);
         // create tag container and systems
         const tagContainer = createElem('div','#tags');
-        const tagsInputContainer = createElem('div','#tags-input-container',);
+        const tagsInputContainer = createElem('div','#tags-input-container','.hidden');
         const tagsInput = createElem('input', '#tags-input')
+        tagsInput.type="text";
         tagsInputContainer.appendChild(tagsInput);
         const tagsInputDisplay = createElem('a', '#tags-input-display');
         tagsInputDisplay.innerHTML="+ Add a tag";
         tagsInputDisplay.addEventListener('click', displayTags);
         tagContainer.appendChild(tagsInputDisplay);
         tagContainer.appendChild(tagsInputContainer)
-
-
+        const addTagButton = createElem('button', '#add-tag');
+        addTagButton.addEventListener('click',await tagsToContainer);
+        addTagButton.innerText="Add";
+        tagsInputContainer.appendChild(addTagButton);
+        const tagsDisplay = createElem('div', '#tags-display');
         spawnContainer.appendChild(tagContainer);
+        tagContainer.appendChild(tagsDisplay);
 
 
         //send button
@@ -272,12 +290,17 @@ let categ;
 
 
 function displayTags(){
-    const tagsCont = document.querySelector('#tags-input');
+    const tagsCont = document.querySelector('#tags-input-container');
+    const text = document.querySelector('#tags-input-display')
 
-    tagsCont.style.display = tagsCont.style.display === 'none' ? '' : 'none';
+tagsCont.classList.toggle('hidden');
+if(text.innerHTML==="+ Add a tag"){
+    text.innerHTML="- close";
+}
+else{
+    text.innerHTML="+ Add a tag";
+    }
 
-
-    tagsCont.style.toggle('hide-tags');
 }
 
 
@@ -298,6 +321,42 @@ function createElem(type,...idandclass){
     return element
 }
 
+
+function tagsToContainer(){
+    const input = document.querySelector('#tags-input');
+    const newTag= input.value;
+    tags.push(newTag);
+    console.log(tags);
+    addTag(newTag);
+}
+
+function addTag(tag){
+    const tagDisplay = document.querySelector('#tags-display')
+    const tagToFind = document.querySelector('#tags');
+    tagToFind.appendChild(tagDisplay)
+    const tagBundle = createElem('div','.tag-bundle');
+    const tagToAdd = createElem('div','.tag');
+    tagToAdd.innerText=tag;
+    const close = createElem('div', '.close-button');
+    close.innerText="X";
+    close.addEventListener('click', function(){
+        const isTag = tags.indexOf(tag);
+        if(isTag>-1){
+            tags.splice(isTag, 1);
+        }
+        tagBundle.remove();
+
+        console.log(tags);
+    })
+    tagBundle.appendChild(tagToAdd)
+    tagBundle.appendChild(close)
+    tagDisplay.appendChild(tagBundle);
+}
+
+function removeTag(){
+    const tag = this.innerText;
+}
+
 function getSpawnData(){
     const spawnName = document.querySelector('#spawn-name');
     const spawnDesc = document.querySelector('#spawn-desc');
@@ -305,20 +364,21 @@ function getSpawnData(){
     const category = document.querySelector('#categories')
     const spawnId = nanoid();
 
-    writeSpawn(spawnName.value,spawnDesc.value,spawnPriority.value,spawnId,category.value);
+    writeSpawn(spawnName.value,spawnDesc.value,spawnPriority.value,spawnId,category.value,tags);
 
 
 
 };
 
-function writeSpawn(name,desc,priority,id,category) {
+function writeSpawn(name,desc,priority,id,category,tags) {
 
 
     firebase.database().ref('users/' + userId+'/spawns/'+id).set({
         spawn_name: name,
         spawn_description: desc,
         spawn_priority : priority,
-        spawn_category: category
+        spawn_category: category,
+        spawn_tags :tags
     });
 }
 
