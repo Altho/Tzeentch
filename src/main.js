@@ -152,8 +152,8 @@ const domElements = (() => {
             for (let spawn in spawns) {
                 const expSpawn = spawns[spawn];
                 const spawnCard = createElem('div', '.spawn-card');
-                spawnCard.addEventListener('click',await function(){
-                    expandSpawn(expSpawn,spawnCard);
+                spawnCard.addEventListener('click', await function () {
+                    expandSpawn(expSpawn, spawnCard);
                 });
                 const spawnName = createElem('div', '.spawn-name');
                 if (spawns[spawn].spawn_priority == "low") {
@@ -168,47 +168,45 @@ const domElements = (() => {
                 spawnContainer.appendChild(spawnCard);
                 spawnCard.appendChild(spawnName);
                 spawnName.innerHTML = spawns[spawn].spawn_name;
-                const spawnDescSample = createElem('div','.spawn-des-sample');
-                if(spawns[spawn].spawn_description.length>50){
-                    const shortenedDes = spawns[spawn].spawn_description.substring(0,49)
+                const spawnDescSample = createElem('div', '.spawn-des-sample');
+                if (spawns[spawn].spawn_description.length > 50) {
+                    const shortenedDes = spawns[spawn].spawn_description.substring(0, 49)
                     spawnDescSample.innerHTML = shortenedDes + ' . . .';
                     spawnCard.appendChild(spawnDescSample);
-                }
-                else{
+                } else {
                     spawnDescSample.innerHTML = spawns[spawn].spawn_description;
                     spawnCard.appendChild(spawnDescSample);
 
                 }
 
 
-                if(spawns[spawn].end_date){
-                    const timeRemaining = createElem('div','.time-remaining-bundle');
-                    const timeLeftText = createElem('div','.time-text');
-                    timeLeftText.innerHTML="Ends :"
-                    const time = createElem('div','.time');
-                    time.innerHTML=spawns[spawn].end_date;
+                if (spawns[spawn].end_date) {
+                    const timeRemaining = createElem('div', '.time-remaining-bundle');
+                    const timeLeftText = createElem('div', '.time-text');
+                    timeLeftText.innerHTML = "Ends :"
+                    const time = createElem('div', '.time');
+                    time.innerHTML = spawns[spawn].end_date;
                     timeRemaining.appendChild(timeLeftText);
                     timeRemaining.appendChild(time);
                     spawnCard.appendChild(timeRemaining);
 
 
-
                 }
-                const arrowWrapper = createElem('div','.arrow-wrapper','.hidden');
-                const arrowContainer=createElem('div','.arrow-container');
-                const chevron1 = createElem('div','.chevron');
-                const chevron2 = createElem('div','.chevron');
-                const chevron3 = createElem('div','.chevron');
+                const arrowWrapper = createElem('div', '.arrow-wrapper', '.hidden');
+                const arrowContainer = createElem('div', '.arrow-container');
+                const chevron1 = createElem('div', '.chevron');
+                const chevron2 = createElem('div', '.chevron');
+                const chevron3 = createElem('div', '.chevron');
                 arrowContainer.appendChild(chevron1)
                 arrowContainer.appendChild(chevron2)
                 arrowContainer.appendChild(chevron3)
                 arrowWrapper.appendChild(arrowContainer);
                 spawnCard.appendChild(arrowWrapper);
-                spawnCard.addEventListener('mouseover', function(){
+                spawnCard.addEventListener('mouseover', function () {
                     arrowWrapper.classList.remove('hidden');
 
                 })
-                spawnCard.addEventListener('mouseout', function(){
+                spawnCard.addEventListener('mouseout', function () {
                     arrowWrapper.classList.add('hidden');
                 })
 
@@ -468,7 +466,7 @@ const domElements = (() => {
             sendButton.innerText = "Create spawn";
             sendButton.addEventListener('click', async function () {
                 const spawnCards = document.querySelector('#show-span-container');
-                if(spawnCards){
+                if (spawnCards) {
                     spawnCards.remove();
 
                 }
@@ -494,32 +492,73 @@ const domElements = (() => {
         }
 
 
-        return {navGen, spawnUiGen, addSpawn, showAllSpawn, addSpawnContainer,expandSpawn};
+        return {navGen, spawnUiGen, addSpawn, showAllSpawn, addSpawnContainer, expandSpawn};
 
     }
 
 )();
 
-async function expandSpawn(spawn,card) {
+async function expandSpawn(spawn, card) {
 
     while (card.firstChild) {
         card.removeChild(card.firstChild);
     }
     const spawnName = createElem('div', '.spawn-name');
-    spawnName.innerHTML=spawn.spawn_name;
+    spawnName.innerHTML = spawn.spawn_name;
     card.classList.add('expanded');
     card.appendChild(spawnName);
     const expandedContainer = createElem('div', '.expanded-container');
-    const descContainer = createElem('div','.desc-container');
-    const description  = createElem('p', 'full-description');
+
+    //time
+    if (spawn.start_date || spawn.end_date) {
+        const timeDiv = createElem('div', '.ex-time-dive');
+        expandedContainer.appendChild(timeDiv);
+        const startTimeDiv = createElem('div', '.ex-start-div');
+        const endTimeDiv = createElem('div', '.ex-end-div');
+        const startNameDiv = createElem('div', '.start-name-div');
+        startNameDiv.innerHTML = "START TIME"
+        const endNameDiv = createElem('div', '.end-name-div');
+        ;
+        endNameDiv.innerHTML = "END TIME";
+        startTimeDiv.appendChild(startNameDiv);
+        endTimeDiv.appendChild(endNameDiv);
+        const startDisplay = createElem('div', '.start-display');
+        const endDisplay = createElem('div', '.end-display');
+        startDisplay.innerHTML = spawn.start_date;
+        endDisplay.innerHTML = spawn.end_date;
+        startTimeDiv.appendChild(startDisplay);
+        endTimeDiv.appendChild(endDisplay);
+
+
+        timeDiv.appendChild(startTimeDiv);
+        timeDiv.appendChild(endTimeDiv);
+        expandedContainer.appendChild(timeDiv);
+        createElem('span', '.time-display');
+        createElem('span', '.time-display');
+
+
+    }
+
+    //tags
+    if(spawn.spawn_tags){
+        const exTagContainer = createElem('div', '.ex-tag-container');
+        expandedContainer.appendChild(exTagContainer);
+        for(let tag in spawn.spawn_tags){
+            const newTag = createElem('div','.ex-tag');
+            newTag.innerText=spawn.spawn_tags[tag];
+            exTagContainer.appendChild(newTag);
+
+        }
+    }
+
+
+    const descContainer = createElem('div', '.desc-container');
+    const description = createElem('p', 'full-description');
     descContainer.appendChild(description)
-    description.innerText=spawn.spawn_description;
+    description.innerText = spawn.spawn_description;
 
     card.appendChild(expandedContainer);
-   expandedContainer.appendChild(descContainer);
-
-
-
+    expandedContainer.appendChild(descContainer);
 
 
 }
