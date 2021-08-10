@@ -142,31 +142,83 @@ firebase.auth().onAuthStateChanged(async function (user) {
 });
 
 const domElements = (() => {
-        const showAllSpawn = async() =>{
+        const showAllSpawn = async () => {
+            containerCheck();
             const spawnContainer = addSpawnContainer();
             document.body.appendChild(spawnContainer);
 
             console.log('Fetching spawns')
-            const spawns =await fetchSpawns();
-            for (let spawn in spawns ){
+            const spawns = await fetchSpawns();
+            for (let spawn in spawns) {
+                const expSpawn = spawns[spawn];
                 const spawnCard = createElem('div', '.spawn-card');
+                spawnCard.addEventListener('click',await function(){
+                    expandSpawn(expSpawn,spawnCard);
+                });
                 const spawnName = createElem('div', '.spawn-name');
-                if(spawns[spawn].spawn_priority=="low"){
+                if (spawns[spawn].spawn_priority == "low") {
                     spawnCard.classList.add('low');
-                }
-                else if(spawns[spawn].spawn_priority=="medium"){
+                } else if (spawns[spawn].spawn_priority == "medium") {
                     spawnCard.classList.add('medium');
-                }
-                else if(spawns[spawn].spawn_priority=="important"){
+                } else if (spawns[spawn].spawn_priority == "important") {
                     spawnCard.classList.add('important');
-                }
-                else if(spawns[spawn].spawn_priority=="critical"){
+                } else if (spawns[spawn].spawn_priority == "critical") {
                     spawnCard.classList.add('critical');
                 }
                 spawnContainer.appendChild(spawnCard);
                 spawnCard.appendChild(spawnName);
-                spawnName.innerHTML=spawns[spawn].spawn_name;
+                spawnName.innerHTML = spawns[spawn].spawn_name;
+                const spawnDescSample = createElem('div','.spawn-des-sample');
+                if(spawns[spawn].spawn_description.length>50){
+                    const shortenedDes = spawns[spawn].spawn_description.substring(0,49)
+                    spawnDescSample.innerHTML = shortenedDes + ' . . .';
+                    spawnCard.appendChild(spawnDescSample);
+                }
+                else{
+                    spawnDescSample.innerHTML = spawns[spawn].spawn_description;
+                    spawnCard.appendChild(spawnDescSample);
+
+                }
+
+
+                if(spawns[spawn].end_date){
+                    const timeRemaining = createElem('div','.time-remaining-bundle');
+                    const timeLeftText = createElem('div','.time-text');
+                    timeLeftText.innerHTML="Ends :"
+                    const time = createElem('div','.time');
+                    time.innerHTML=spawns[spawn].end_date;
+                    timeRemaining.appendChild(timeLeftText);
+                    timeRemaining.appendChild(time);
+                    spawnCard.appendChild(timeRemaining);
+
+
+
+                }
+                const arrowWrapper = createElem('div','.arrow-wrapper','.hidden');
+                const arrowContainer=createElem('div','.arrow-container');
+                const chevron1 = createElem('div','.chevron');
+                const chevron2 = createElem('div','.chevron');
+                const chevron3 = createElem('div','.chevron');
+                arrowContainer.appendChild(chevron1)
+                arrowContainer.appendChild(chevron2)
+                arrowContainer.appendChild(chevron3)
+                arrowWrapper.appendChild(arrowContainer);
+                spawnCard.appendChild(arrowWrapper);
+                spawnCard.addEventListener('mouseover', function(){
+                    arrowWrapper.classList.remove('hidden');
+
+                })
+                spawnCard.addEventListener('mouseout', function(){
+                    arrowWrapper.classList.add('hidden');
+                })
+
                 console.log(spawns[spawn].spawn_name);
+            }
+        }
+        const containerCheck = () => {
+            const checkContainer = document.querySelector('#show-span-container');
+            if (checkContainer) {
+                checkContainer.remove()
             }
         }
         const addSpawnContainer = () => {
@@ -194,7 +246,9 @@ const domElements = (() => {
             return navbar;
 
         }
+
         const spawnUiGen = async () => {
+            containerCheck();
             //spawn name
             const infosName = createElem('div', '.section-name');
             infosName.innerText = "Spawn's infos";
@@ -212,7 +266,7 @@ const domElements = (() => {
             const spawnName = createElem('input', '#spawn-name');
             const closeSpawns = createElem('div', '#close-spawns');
             closeSpawns.innerHTML = "Close";
-            closeSpawns.addEventListener('click', async() => {
+            closeSpawns.addEventListener('click', async () => {
                 spawnContainer.remove();
                 await showAllSpawn();
             })
@@ -412,15 +466,17 @@ const domElements = (() => {
             //send button
             const sendButton = createElem('button', '#send-button');
             sendButton.innerText = "Create spawn";
-            sendButton.addEventListener('click', async function(){
+            sendButton.addEventListener('click', async function () {
                 const spawnCards = document.querySelector('#show-span-container');
-                spawnCards.remove();
+                if(spawnCards){
+                    spawnCards.remove();
+
+                }
                 getSpawnData();
                 spawnContainer.remove();
                 await showAllSpawn();
             });
             spawnContainer.appendChild(sendButton);
-
 
 
             return spawnContainer
@@ -438,15 +494,38 @@ const domElements = (() => {
         }
 
 
-
-        return {navGen, spawnUiGen, addSpawn,showAllSpawn,addSpawnContainer};
+        return {navGen, spawnUiGen, addSpawn, showAllSpawn, addSpawnContainer,expandSpawn};
 
     }
 
 )();
 
+async function expandSpawn(spawn,card) {
+
+    while (card.firstChild) {
+        card.removeChild(card.firstChild);
+    }
+    const spawnName = createElem('div', '.spawn-name');
+    spawnName.innerHTML=spawn.spawn_name;
+    card.classList.add('expanded');
+    card.appendChild(spawnName);
+    const expandedContainer = createElem('div', '.expanded-container');
+    const descContainer = createElem('div','.desc-container');
+    const description  = createElem('p', 'full-description');
+    descContainer.appendChild(description)
+    description.innerText=spawn.spawn_description;
+
+    card.appendChild(expandedContainer);
+   expandedContainer.appendChild(descContainer);
+
+
+
+
+
+}
+
 //TODO : Keep working on fetching spawns.
-async function fetchSpawns(){
+async function fetchSpawns() {
     let spawns;
     await dbRef.child("users").child(userId).child("spawns").get().then((snapshot) => {
         if (snapshot.exists()) {
