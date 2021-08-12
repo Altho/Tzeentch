@@ -69,12 +69,10 @@ body {
     height: 100%;
     margin: 0;
     background: rgb(41,24,58);
-    background: -moz-linear-gradient(308deg, rgba(41,24,58,1) 0%, rgba(64,44,94,1) 50%, rgba(72,77,109,1) 100%);
-    background: -webkit-linear-gradient(308deg, rgba(41,24,58,1) 0%, rgba(64,44,94,1) 50%, rgba(72,77,109,1) 100%);
-    background: linear-gradient(308deg, rgba(41,24,58,1) 0%, rgba(64,44,94,1) 50%, rgba(72,77,109,1) 100%);
+    background: repeating-linear-gradient(308deg, rgba(41,24,58,1) 0%, rgba(64,44,94,1) 50%, rgba(72,77,109,1) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#29183a",endColorstr="#484d6d",GradientType=1);
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-repeat: repeat-y;
+    background-size: contain;
 }
 
 #big-auth-cont{
@@ -398,20 +396,41 @@ input[type=text]{
     border-radius: 25px;
     border-bottom:1px solid white
 }
-#show-span-container{
+#show-span-container {
 
     padding: 25px;
     display: flex;
     flex-wrap: wrap;
+    align-items: baseline;
 }
-.spawn-card {
+
+.category-image-div{
+margin-right: 5px;
+
+}
+.category-name-div{
+color:white;
+}
+.category-image-div img{
+    max-height: 16px;
+    max-width: 16px;
+    width: 100%;
+
+}
+.category-card-bundle {
     display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+    border-radius: 10px;
+    padding: 3px;
+}
+
+.spawn-card {
+    display: block;
+    /*flex-direction: column;*/
+    /*justify-content: space-around;*/
     margin: 10px;
-    padding: 20px;
+    padding: 0 10px 10px 10px;
     width: 20%;
-    min-height: 60px;
+    min-height: 170px;
     border-radius: 10px;
     box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.25);
     transition: all 0.2s;
@@ -434,7 +453,7 @@ input[type=text]{
 }
 
 .expanded {
-    width: 45%;
+    width: 35%;
 }
 
 .expanded-container {
@@ -448,12 +467,90 @@ input[type=text]{
     overflow-y: hidden;
 }
 
+.edit-div{
+    cursor: pointer;
+}
+
+.edit-div:hover{
+    transform: scale(1.2);
+}
+
+.spawn-menu {
+    /*padding-left: 10px;*/
+    align-items: center;
+    margin: 3px;
+    display: flex;
+    justify-content: space-between;
+}
+.phone-bundle{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.phone-area{
+    margin: 10px 0px 5px 0px;
+
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    font-size: 1.2em;
+    border-radius: 0px 25px 25px 0px;
+    border: 2px solid white;
+    border-left: none;
+    height: 30px;
+    background: rgb(255,255,255);
+    background: -moz-linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6292892156862745) 50%, rgba(255,255,255,0) 100%);
+    background: -webkit-linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6292892156862745) 50%, rgba(255,255,255,0) 100%);
+    background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6292892156862745) 50%, rgba(255,255,255,0) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff",endColorstr="#ffffff",GradientType=1);
+}
+.phone-logo
+{
+    display: flex;
+    align-items: center;
+    margin: 10px 0px 5px 10px;
+    height: 30px;
+    padding: 5px;
+/*background-color: grey;*/
+    border-radius: 25px 0 0 25px;
+    border: 2px solid white;
+    background: rgb(0,0,0);
+    background: -moz-linear-gradient(180deg, rgba(0,0,0,0.20351890756302526) 0%, rgba(255,255,255,1) 50%, rgba(0,0,0,0.20351890756302526) 100%);
+    background: -webkit-linear-gradient(180deg, rgba(0,0,0,0.20351890756302526) 0%, rgba(255,255,255,1) 50%, rgba(0,0,0,0.20351890756302526) 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.20351890756302526) 0%, rgba(255,255,255,1) 50%, rgba(0,0,0,0.20351890756302526) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#000000",endColorstr="#000000",GradientType=1);
+
+
+}
+
+.ex-task-container {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 20px 35px 20px 35px;
+    box-shadow: 15px -12px 16px -2px rgba(0,0,0,0.66);
+    -webkit-box-shadow: 15px -12px 16px -2px rgba(0,0,0,0.66);
+    -moz-box-shadow: 15px -12px 16px -2px rgba(0,0,0,0.66);
+}
+
+.ex-task-bundle{
+display: flex;
+    padding: 5px;
+justify-content: space-between;
+}
+.ex-task-bundle:nth-child(2n){
+    background-color: rgba(0,0,0,0.2);
+}
+.ex-task-bundle:hover{
+    background-color: rgba(102, 0, 255,0.2)
+;
+}
+
 .desc-container {
     background-color: rgba(0,0,0,0.1);
     margin-top: -20px;
 margin-left : -20px;
     margin-right: -20px;
-    border-bottom: 2px solid black;
 
 }
 
@@ -503,16 +600,16 @@ margin-left : -20px;
 }
 .spawn-card:hover {
     box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.4);
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 
 
 .low {
-    background: #C9D9FB;
-    background: -webkit-linear-gradient(top left, #C9D9FB, #3744AE);
-    background: -moz-linear-gradient(top left, #C9D9FB, #3744AE);
-    background: linear-gradient(to bottom right, #C9D9FB, #3744AE);
+    background: #0101A2;
+    background: -webkit-linear-gradient(top left, #0101A2, #4B3FB4);
+    background: -moz-linear-gradient(top left, #0101A2, #4B3FB4);
+    background: linear-gradient(to bottom right, #0101A2, #4B3FB4);
 }
 .medium{
     background: #FCFF01;
@@ -533,14 +630,24 @@ margin-left : -20px;
     background: linear-gradient(to bottom right, #FF3535, #630101);
 }
 #add-spawn{
-    color: white;
+    cursor: pointer;
+    color: black;
+    background: white;
+    width:50px;
+    height: 50px;
+    background: url("./add.svg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 50%;
     font-size: 5em;
-    position: absolute;
+    position: fixed;
     bottom:10px;
     right:10px;
 }
 
 #spawn-container{
+    align-items: stretch;
     height: 500px;
     overflow: scroll;
     position: absolute;

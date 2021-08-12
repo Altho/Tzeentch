@@ -2,15 +2,29 @@ import './style.css';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
-import 'firebaseui'
-import 'firebaseui/dist/firebaseui.css'
+import 'firebaseui';
+import 'firebaseui/dist/firebaseui.css';
+import phone from './phone.svg';
+import 'masonry-layout';
 
 import profile from './profile.svg';
 import tzeentch from './tzeentch.svg';
 import {nanoid} from 'nanoid';
 
+import administrative from './categories/city-hall.svg';
+import social from './categories/user.svg';
+import groceries from './categories/groceries.svg';
+import financial from './categories/money.svg';
+import fun from './categories/party.svg';
+import personnal from './categories/personnal.svg';
+import Work from './categories/work.svg';
+import edit from './categories/edit.svg';
+
+
 let tags = [];
 let tasks = [];
+
+
 
 import close from './close.svg';
 
@@ -143,6 +157,7 @@ firebase.auth().onAuthStateChanged(async function (user) {
 
 const domElements = (() => {
         const showAllSpawn = async () => {
+            let storeCard;
             containerCheck();
             const spawnContainer = addSpawnContainer();
             document.body.appendChild(spawnContainer);
@@ -151,7 +166,7 @@ const domElements = (() => {
             const spawns = await fetchSpawns();
             for (let spawn in spawns) {
                 const expSpawn = spawns[spawn];
-                const spawnCard = createElem('div', '.spawn-card');
+                let spawnCard = createElem('div', '.spawn-card');
                 spawnCard.addEventListener('click', await function () {
                     expandSpawn(expSpawn, spawnCard);
                 });
@@ -166,6 +181,11 @@ const domElements = (() => {
                     spawnCard.classList.add('critical');
                 }
                 spawnContainer.appendChild(spawnCard);
+                const spawnMenu = createElem('div', '.spawn-menu');
+                spawnCard.appendChild(spawnMenu);
+                spawnMenu.appendChild(showCategories(spawns[spawn].spawn_category));
+                spawnMenu.appendChild(showEdit());
+
                 spawnCard.appendChild(spawnName);
                 spawnName.innerHTML = spawns[spawn].spawn_name;
                 const spawnDescSample = createElem('div', '.spawn-des-sample');
@@ -205,12 +225,15 @@ const domElements = (() => {
                 spawnCard.addEventListener('mouseover', function () {
                     arrowWrapper.classList.remove('hidden');
 
+
                 })
                 spawnCard.addEventListener('mouseout', function () {
                     arrowWrapper.classList.add('hidden');
                 })
 
-                console.log(spawns[spawn].spawn_name);
+                spawnCard.addEventListener('mouseleave', function () {
+                    console.log(storeCard)
+                });
             }
         }
         const containerCheck = () => {
@@ -483,7 +506,7 @@ const domElements = (() => {
 
         async function addSpawn() {
             const addButton = createElem('div', '#add-spawn');
-            addButton.innerHTML = "+";
+
             document.body.appendChild(addButton);
             addButton.addEventListener('click', async function () {
                 document.body.appendChild(await spawnUiGen())
@@ -503,11 +526,19 @@ async function expandSpawn(spawn, card) {
     while (card.firstChild) {
         card.removeChild(card.firstChild);
     }
+    const spawnMenu = createElem('div', '.spawn-menu');
+    card.appendChild(spawnMenu);
+    spawnMenu.appendChild(showCategories(spawn.spawn_category));
+
+    spawnMenu.appendChild(showEdit());
+
+    // spawnMenu.innerText=spawn.spawn_category;
     const spawnName = createElem('div', '.spawn-name');
     spawnName.innerHTML = spawn.spawn_name;
     card.classList.add('expanded');
     card.appendChild(spawnName);
     const expandedContainer = createElem('div', '.expanded-container');
+
 
     //time
     if (spawn.start_date || spawn.end_date) {
@@ -539,28 +570,76 @@ async function expandSpawn(spawn, card) {
 
     }
 
+    //phone
+    if (spawn.phone_number) {
+        const phoneBundle = createElem('div', '.phone-bundle');
+        expandedContainer.appendChild(phoneBundle);
+        const phoneArea = createElem('div', '.phone-area');
+        const phoneIcon = createElem('div', '.phone-logo');
+        const phoneLogo = new Image();
+        phoneLogo.src = phone;
+        phoneBundle.appendChild(phoneIcon);
+        phoneBundle.appendChild(phoneArea);
+        phoneArea.innerText = spawn.phone_number;
+        phoneIcon.appendChild(phoneLogo);
+        phoneBundle.addEventListener('click', function () {
+            window.location = `tel:${spawn.phone_number}`
+        })
+        console.log(phone)
+    }
+
     //tags
-    if(spawn.spawn_tags){
+    if (spawn.spawn_tags) {
         const exTagContainer = createElem('div', '.ex-tag-container');
         expandedContainer.appendChild(exTagContainer);
-        for(let tag in spawn.spawn_tags){
-            const newTag = createElem('div','.ex-tag');
-            newTag.innerText=spawn.spawn_tags[tag];
+        for (let tag in spawn.spawn_tags) {
+            const newTag = createElem('div', '.ex-tag');
+            newTag.innerText = spawn.spawn_tags[tag];
             exTagContainer.appendChild(newTag);
 
         }
     }
+    //tasks
+
+    if (spawn.spawn_description) {
+        const descContainer = createElem('div', '.desc-container');
+        const description = createElem('p', 'full-description');
+        descContainer.appendChild(description)
+        description.innerText = spawn.spawn_description;
+        expandedContainer.appendChild(descContainer);
 
 
-    const descContainer = createElem('div', '.desc-container');
-    const description = createElem('p', 'full-description');
-    descContainer.appendChild(description)
-    description.innerText = spawn.spawn_description;
+    }
+
 
     card.appendChild(expandedContainer);
-    expandedContainer.appendChild(descContainer);
+    if (spawn.spawn_tasks) {
+        const exTaskContainer = createElem('div', '.ex-task-container');
+        expandedContainer.appendChild(exTaskContainer);
+        for (let task in spawn.spawn_tasks) {
+            const taskBundle = createElem('div', '.ex-task-bundle');
+            exTaskContainer.appendChild(taskBundle);
+            const taskContent = createElem('div', '.ex-task-div');
+            const taskCheck = createElem('input', '.ex-task-check');
+            taskCheck.type = "checkbox";
+            taskBundle.appendChild(taskContent);
+            taskBundle.appendChild(taskCheck);
+            taskContent.innerText = spawn.spawn_tasks[task].task;
+            if (spawn.spawn_tasks[task].isDone === true) {
+                taskCheck.checked = "true";
+            }
+        }
+    }
 
 
+}
+
+function showEdit(){
+    const editImg = new Image();
+    editImg.src=edit;
+    const editDiv = createElem('div', '.edit-div');
+    editDiv.appendChild(editImg);
+    return editDiv;
 }
 
 //TODO : Keep working on fetching spawns.
@@ -686,6 +765,45 @@ function getSpawnData() {
 
 };
 
+function showCategories(category) {
+    const image = new Image();
+    const categBundle = createElem('div', '.category-card-bundle');
+    const categImgDiv = createElem('div', '.category-image-div');
+    const categNameDiv = createElem('div', '.category-name-div');
+    image.src = getCategoryImage(category);
+    categNameDiv.innerText = category;
+    categImgDiv.appendChild(image);
+    categBundle.appendChild(categImgDiv);
+    categBundle.appendChild(categNameDiv);
+    return categBundle;
+}
+
+function getCategoryImage(category) {
+    switch (category){
+        case "Work" :
+            return Work;
+            break;
+        case "Fun" :
+            return fun;
+            break;
+        case "Administrative" :
+            return administrative;
+            break;
+        case "Finance" :
+            return financial;
+            break;
+        case "Groceries" :
+            return groceries;
+            break;
+        case "Social" :
+            return social;
+            break;
+        case "Personal" :
+            return personnal;
+            break;
+
+    }}
+
 function writeSpawn(name, desc, priority, id, category, tags, tasks, startDate, endDate, phone, address) {
     console.log(tasks);
 
@@ -717,7 +835,12 @@ function writeSpawn(name, desc, priority, id, category, tags, tasks, startDate, 
 // writeUserData();
 
 
-
+const elem = document.querySelector('#show-span-container');
+const msnry = new Masonry( elem, {
+    // options
+    itemSelector: '.spawn-card',
+    columnWidth: 200
+});
 
 
 
