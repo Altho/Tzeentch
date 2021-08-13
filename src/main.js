@@ -6,6 +6,8 @@ import 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
 import phone from './phone.svg';
 import 'masonry-layout';
+import { format, compareAsc } from 'date-fns'
+
 
 import profile from './profile.svg';
 import tzeentch from './tzeentch.svg';
@@ -456,6 +458,7 @@ const domElements = (() => {
             startDateSelect.type = "datetime-local";
             startDateSelect.setAttribute('disabled', true);
 
+
             const now = new Date();
             startDateContainer.appendChild(startDateSelect);
             startDateSelect.value = now.value;
@@ -629,6 +632,16 @@ async function expandSpawn(spawn, card) {
                 taskCheck.checked = "true";
             }
         }
+    }
+
+    //address
+    if(spawn.address){
+        const addressDiv = createElem('div', '.address-div');
+        const addressLink = createElem('a', 'address-link');
+        addressLink.innerText = spawn.address;
+        addressLink.href=`https://www.google.com/maps/search/${spawn.address}`;
+        addressDiv.appendChild(addressLink);
+        expandedContainer.appendChild(addressDiv);
     }
 
 

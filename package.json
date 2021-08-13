@@ -31,6 +31,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
+    "date-fns": "^2.23.0",
     "firebase": "^8.9.0",
     "firebaseui": "^4.8.1",
     "masonry-layout": "^4.2.2",
