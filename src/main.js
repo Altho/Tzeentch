@@ -6,7 +6,7 @@ import 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
 import phone from './phone.svg';
 import 'masonry-layout';
-import { format, compareAsc } from 'date-fns'
+import {format, compareAsc} from 'date-fns'
 
 
 import profile from './profile.svg';
@@ -22,10 +22,12 @@ import personnal from './categories/personnal.svg';
 import Work from './categories/work.svg';
 import edit from './categories/edit.svg';
 
+import closeSpwan from './spawn-close.svg';
 
+let expanded = false;
 let tags = [];
 let tasks = [];
-
+let getSpawnId;
 
 
 import close from './close.svg';
@@ -159,6 +161,8 @@ firebase.auth().onAuthStateChanged(async function (user) {
 
 const domElements = (() => {
         const showAllSpawn = async () => {
+
+
             let storeCard;
             containerCheck();
             const spawnContainer = addSpawnContainer();
@@ -171,6 +175,7 @@ const domElements = (() => {
                 let spawnCard = createElem('div', '.spawn-card');
                 spawnCard.addEventListener('click', await function () {
                     expandSpawn(expSpawn, spawnCard);
+                    getSpawnId = spawn;
                 });
                 const spawnName = createElem('div', '.spawn-name');
                 if (spawns[spawn].spawn_priority == "low") {
@@ -186,7 +191,11 @@ const domElements = (() => {
                 const spawnMenu = createElem('div', '.spawn-menu');
                 spawnCard.appendChild(spawnMenu);
                 spawnMenu.appendChild(showCategories(spawns[spawn].spawn_category));
-                spawnMenu.appendChild(showEdit());
+                const menuFunctions = createElem('div', '.menu-functions');
+                spawnMenu.appendChild(menuFunctions);
+                menuFunctions.appendChild(showEdit());
+                // menuFunctions.appendChild(showClose());
+
 
                 spawnCard.appendChild(spawnName);
                 spawnName.innerHTML = spawns[spawn].spawn_name;
@@ -236,6 +245,8 @@ const domElements = (() => {
                 spawnCard.addEventListener('mouseleave', function () {
                     console.log(storeCard)
                 });
+                const previousSpawnContainer = document.querySelector('#show-span-container');
+                previousSpawnContainer.removeEventListener('click', domElements.showAllSpawn);
             }
         }
         const containerCheck = () => {
@@ -271,6 +282,7 @@ const domElements = (() => {
         }
 
         const spawnUiGen = async () => {
+
             containerCheck();
             //spawn name
             const infosName = createElem('div', '.section-name');
@@ -491,6 +503,7 @@ const domElements = (() => {
             const sendButton = createElem('button', '#send-button');
             sendButton.innerText = "Create spawn";
             sendButton.addEventListener('click', async function () {
+                tasks = [];
                 const spawnCards = document.querySelector('#show-span-container');
                 if (spawnCards) {
                     spawnCards.remove();
@@ -507,6 +520,10 @@ const domElements = (() => {
 
         }
 
+        async function editSpawn() {
+            await spawnUiGen();
+        }
+
         async function addSpawn() {
             const addButton = createElem('div', '#add-spawn');
 
@@ -518,7 +535,7 @@ const domElements = (() => {
         }
 
 
-        return {navGen, spawnUiGen, addSpawn, showAllSpawn, addSpawnContainer, expandSpawn};
+        return {navGen, spawnUiGen, addSpawn, showAllSpawn, addSpawnContainer, expandSpawn, editSpawn};
 
     }
 
@@ -526,14 +543,35 @@ const domElements = (() => {
 
 async function expandSpawn(spawn, card) {
 
+    const spawnCards = document.querySelectorAll('.spawn-card');
+    const spawnContainer = document.querySelector('#show-span-container')
+
+
+    // spawnContainer.remove();
+    // const newSpawnContainer = domElements.addSpawnContainer();
+    // document.body.appendChild(newSpawnContainer);
+    card.classList.remove('spawn-card');
+
+    for (let cardCheck of spawnCards) {
+        if (cardCheck != card) {
+            cardCheck.remove();
+        }
+
+    }
+
+
     while (card.firstChild) {
         card.removeChild(card.firstChild);
     }
     const spawnMenu = createElem('div', '.spawn-menu');
     card.appendChild(spawnMenu);
     spawnMenu.appendChild(showCategories(spawn.spawn_category));
+    const menuFunctions = createElem('div', '.menu-functions');
 
-    spawnMenu.appendChild(showEdit());
+    spawnMenu.appendChild(menuFunctions);
+    menuFunctions.appendChild(showEdit());
+    menuFunctions.appendChild(showClose());
+
 
     // spawnMenu.innerText=spawn.spawn_category;
     const spawnName = createElem('div', '.spawn-name');
@@ -635,24 +673,71 @@ async function expandSpawn(spawn, card) {
     }
 
     //address
-    if(spawn.address){
+    if (spawn.address) {
         const addressDiv = createElem('div', '.address-div');
         const addressLink = createElem('a', 'address-link');
         addressLink.innerText = spawn.address;
-        addressLink.href=`https://www.google.com/maps/search/${spawn.address}`;
+        addressLink.href = `https://www.google.com/maps/search/${spawn.address}`;
         addressDiv.appendChild(addressLink);
         expandedContainer.appendChild(addressDiv);
     }
+    if (expanded === true) {
+        const closeButton = document.querySelector('.close-spawn-div');
+        closeButton.addEventListener('click', function handler() {
+            expanded = false;
+            domElements.showAllSpawn();
+            this.removeEventListener('click', handler);
+        });
+        // spawnContainer.addEventListener('click',domElements.showAllSpawn);
 
+
+    }
+    //delete spawn
+    const deleteButton = createElem('button', '.delete-button');
+    deleteButton.innerText = "delete";
+
+
+    deleteButton.addEventListener('click', function () {
+        deleteSpawn();
+    })
+    expandedContainer.appendChild(deleteButton);
+    expanded = true;
 
 }
 
-function showEdit(){
+function showEdit() {
     const editImg = new Image();
-    editImg.src=edit;
+    editImg.src = edit;
     const editDiv = createElem('div', '.edit-div');
     editDiv.appendChild(editImg);
+    editImg.addEventListener('click', async function () {
+        await domElements.spawnUiGen();
+
+    });
     return editDiv;
+}
+
+async function deleteSpawn() {
+
+    const toBeDeleted = dbRef.child('users/').child(userId).child('/spawns').child(getSpawnId);
+    toBeDeleted.remove()
+        .then(function () {
+            console.log("Remove succeeded.")
+            domElements.showAllSpawn();
+            console.log(toBeDeleted);
+
+        })
+        .catch(function (error) {
+            console.log("Remove failed: " + error.message)
+        });
+}
+
+function showClose() {
+    const closeImg = new Image();
+    closeImg.src = closeSpwan;
+    const closeDiv = createElem('div', '.close-spawn-div');
+    closeDiv.appendChild(closeImg);
+    return closeDiv;
 }
 
 //TODO : Keep working on fetching spawns.
@@ -792,7 +877,7 @@ function showCategories(category) {
 }
 
 function getCategoryImage(category) {
-    switch (category){
+    switch (category) {
         case "Work" :
             return Work;
             break;
@@ -815,7 +900,8 @@ function getCategoryImage(category) {
             return personnal;
             break;
 
-    }}
+    }
+}
 
 function writeSpawn(name, desc, priority, id, category, tags, tasks, startDate, endDate, phone, address) {
     console.log(tasks);
@@ -848,12 +934,12 @@ function writeSpawn(name, desc, priority, id, category, tags, tasks, startDate, 
 // writeUserData();
 
 
-const elem = document.querySelector('#show-span-container');
-const msnry = new Masonry( elem, {
-    // options
-    itemSelector: '.spawn-card',
-    columnWidth: 200
-});
+// const elem = document.querySelector('#show-span-container');
+// const msnry = new Masonry( elem, {
+//     // options
+//     itemSelector: '.spawn-card',
+//     columnWidth: 200
+// });}
 
 
 

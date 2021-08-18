@@ -396,12 +396,38 @@ input[type=text]{
     border-radius: 25px;
     border-bottom:1px solid white
 }
-#show-span-container {
 
+.delete-button {
+    color: white;
+    padding: 3px;
+    border-radius: 25px;
+    align-items: center;
+    margin-top: 15px;
+    width: 100%;
+    height: 35px;
+    background: #FF0101;
+    background: -webkit-linear-gradient(top left, #FF0101, #FFBFA5);
+    background: -moz-linear-gradient(top left, #FF0101, #FFBFA5);
+    background: linear-gradient(to bottom right, #FF0101, #FFBFA5);
+}
+
+.delete-button:hover {
+
+
+}
+#show-span-container {
+    height: 100%;
     padding: 25px;
     display: flex;
     flex-wrap: wrap;
+    /*justify-content: space-evenly;*/
     align-items: baseline;
+}
+
+@media (width:768px) {
+    .spawn-card{
+        width: 100%;
+    }
 }
 
 .category-image-div{
@@ -431,6 +457,7 @@ color:white;
     padding: 0 10px 10px 10px;
     width: 20%;
     min-height: 170px;
+    min-width: 160px;
     border-radius: 10px;
     box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.25);
     transition: all 0.2s;
@@ -453,8 +480,30 @@ color:white;
 }
 
 .expanded {
-    width: 35%;
+    width: 80%;
+    position: absolute;
+    top : 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    /*flex-direction: column;*/
+    /*justify-content: space-around;*/
+    margin: 10px;
+    padding: 0 10px 10px 10px;
+    min-height: 170px;
+    border-radius: 10px;
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.25);
+    transition: all 0.2s;
+    -webkit-animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+    animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
 }
+
+/*.expanded:hover {*/
+/*    width: 35%;*/
+/*    position: absolute;*/
+/*    top : 50%;*/
+/*    left: 50%;*/
+/*    transform: translate(-50%,-50%);*/
+/*}*/
 
 .expanded-container {
     margin-top: 15px;
@@ -487,6 +536,25 @@ color:white;
     color: white;
     text-decoration: none !important;
 
+}
+
+.menu-functions{
+    display: flex;
+    justify-content: flex-start;
+    padding: 3px;
+}
+
+.menu-functions img {
+    margin-left : 5px;
+}
+
+.close-spawn-div {
+
+}
+
+.close-spawn-div:hover{
+    transform: scale(1.2);
+    cursor: pointer;
 }
 
 .spawn-menu {
